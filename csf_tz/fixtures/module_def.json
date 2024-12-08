@@ -1,0 +1,17 @@
+[
+ {
+  "_assign": null,
+  "_comments": null,
+  "_liked_by": null,
+  "_user_tags": null,
+  "app_name": "csf_tz",
+  "custom": 0,
+  "docstatus": 0,
+  "doctype": "Module Def",
+  "modified": "2024-12-09 00:18:47.756787",
+  "module_name": "Trade In",
+  "name": "Trade In",
+  "package": null,
+  "restrict_to_domain": null
+ }
+]

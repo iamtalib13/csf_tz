@@ -302,6 +302,8 @@ scheduler_events = {
 
 jinja = {"methods": ["csf_tz.custom_api.generate_qrcode"]}
 
+fixtures = ["Custom Field","Item"]
+
 # Testing
 # -------
 

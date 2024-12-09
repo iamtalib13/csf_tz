@@ -302,6 +302,50 @@ scheduler_events = {
 
 jinja = {"methods": ["csf_tz.custom_api.generate_qrcode"]}
 
+fixtures = [
+    {
+        "doctype": "Client Script",
+        "filters": [
+            ["name", "=", "Trade In Child Table"]
+        ]
+    },
+    {
+        "doctype": "Server Script",
+        "filters": [
+            ["name", "in", [
+                "Trade In Sales Percentage Validation",
+                "Trade In Serial No and Batch Validation",
+                "Trade In Stock Entry"
+            ]]
+        ]
+    },
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            ["name", "in", [
+                "Sales Invoice Item-custom_trade_in_incoming_rate",
+                "Company-custom_trade_in_control_account",
+                "Company-custom_trade_in_settings",
+                "Company-custom_trade_in_sales_percentage",
+                "Sales Invoice-custom_is_trade_in",
+                "Sales Invoice Item-custom_trade_in_details",
+                "Sales Invoice Item-custom_trade_in_item",
+                "Sales Invoice Item-custom_trade_in_qty",
+                "Sales Invoice Item-custom_trade_in_uom",
+                "Sales Invoice Item-custom_total_trade_in_value",
+                "Sales Invoice Item-custom_trade_in_serial_no",
+                "Sales Invoice Item-custom_trade_in_column",
+                "Sales Invoice Item-custom_trade_in_batch_no"
+            ]]
+        ]
+    }
+]
+
+patches = [
+    "csf_tz.patches.add_trade_in_item",
+    "csf_tz.patches.add_trade_in_control_account"
+]
+
 # Testing
 # -------
 

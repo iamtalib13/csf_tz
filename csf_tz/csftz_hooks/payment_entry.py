@@ -80,10 +80,11 @@ def get_outstanding_reference_documents(args):
         condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
         common_filter.append(ple.company == args.get("company"))
 
+    party_account = [args.get("party_account")]
     outstanding_invoices = get_outstanding_invoices(
         args.get("party_type"),
         args.get("party"),
-        args.get("party_account"),
+        party_account,
         common_filter=common_filter,
         posting_date=posting_and_due_date,
         min_outstanding=args.get("outstanding_amt_greater_than"),
@@ -100,7 +101,9 @@ def get_outstanding_reference_documents(args):
 
     for d in outstanding_invoices:
         d["exchange_rate"] = 1
-        d["posting_date"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "posting_date")
+        d["posting_date"] = frappe.db.get_value(
+            d.voucher_type, d.voucher_no, "posting_date"
+        )
         if party_account_currency != company_currency:
             if d.voucher_type in frappe.get_hooks("invoice_doctypes"):
                 d["exchange_rate"] = frappe.db.get_value(

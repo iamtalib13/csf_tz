@@ -351,24 +351,28 @@ def get_item_prices(item_code, currency, customer=None, company=None):
             prices_list.append(item_dict)
     return prices_list
 
-
 @frappe.whitelist()
-def get_item_prices_custom(*args):
-    filters = args[5]
-    start = args[3]
-    limit = args[4]
+def get_item_prices_custom(filters=None, start=0, limit=20):
+    if isinstance(filters, str):  # If filters is a string, deserialize it
+        import json
+        try:
+            filters = json.loads(filters)
+        except json.JSONDecodeError:
+            frappe.throw("Invalid format for filters. Ensure it's a valid JSON object.")
+
+    if not filters:  # Default to an empty dictionary if filters is None or invalid
+        filters = {}
+
     unique_records = int(frappe.db.get_value("CSF TZ Settings", None, "unique_records"))
-    if "customer" in filters:
-        customer = filters["customer"]
-    else:
-        customer = ""
-    company = filters["company"]
-    item_code = "'{0}'".format(filters["item_code"])
-    currency = "'{0}'".format(filters["currency"])
+    customer = filters.get("customer", "")
+    company = filters.get("company", "")
+    item_code = "'{0}'".format(filters.get("item_code", ""))
+    currency = "'{0}'".format(filters.get("currency", ""))
     prices_list = []
     unique_price_list = []
     max_records = int(start) + int(limit)
     conditions = ""
+    
     if "posting_date" in filters:
         posting_date = filters["posting_date"]
         from_date = "'{from_date}'".format(from_date=posting_date[1][0])
@@ -380,17 +384,17 @@ def get_item_prices_custom(*args):
         conditions += " AND SI.customer = '%s'" % customer
 
     query = """ SELECT SI.name, SI.posting_date, SI.customer, SIT.item_code, SIT.qty,  SIT.rate
-            FROM `tabSales Invoice` AS SI 
-            INNER JOIN `tabSales Invoice Item` AS SIT ON SIT.parent = SI.name
-            WHERE 
-                SIT.item_code = {0} 
-                AND SIT.parent = SI.name
-                AND SI.docstatus= 1
-                AND SI.currency = {2}
-                AND SI.is_return != 1
-                AND SI.company = '{3}'
-                {1}
-            ORDER by SI.posting_date DESC""".format(
+                FROM `tabSales Invoice` AS SI 
+                INNER JOIN `tabSales Invoice Item` AS SIT ON SIT.parent = SI.name
+                WHERE 
+                    SIT.item_code = {0} 
+                    AND SIT.parent = SI.name
+                    AND SI.docstatus= 1
+                    AND SI.currency = {2}
+                    AND SI.is_return != 1
+                    AND SI.company = '{3}'
+                    {1}
+                ORDER by SI.posting_date DESC""".format(
         item_code, conditions, currency, company
     )
 

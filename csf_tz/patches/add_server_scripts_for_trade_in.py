@@ -135,7 +135,7 @@ if total_trade_in_value > allowed_trade_in_value:
         }
     ]
 
-    # Create or update server scripts
+        # Create or update server scripts
     for script in scripts:
         # Check if the script already exists
         existing_script = frappe.db.exists("Server Script", {"name": script["name"]})
@@ -145,7 +145,9 @@ if total_trade_in_value > allowed_trade_in_value:
             existing_doc = frappe.get_doc("Server Script", existing_script)
             existing_doc.script = script["script"]
             existing_doc.module = script["module"]
+            existing_doc.reference_doctype = "Sales Invoice"  # Corrected attribute name
             existing_doc.save()
+            
         else:
             # Create a new script
             new_doc = frappe.new_doc("Server Script")
@@ -160,5 +162,6 @@ if total_trade_in_value > allowed_trade_in_value:
                 "cron_format": None,
                 "event_frequency": "All",
                 "docstatus": 0,
+                "reference_doctype": "Sales Invoice"  # Corrected attribute name
             })
             new_doc.insert()

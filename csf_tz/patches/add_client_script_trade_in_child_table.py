@@ -23,16 +23,21 @@ frappe.ui.form.on('Sales Invoice', {
             // Check if "Trade In" item is already added
             const exists = frm.doc.items.some(item => item.item_code === "Trade In");
             if (!exists) {
-                // Add a new row with "Trade In"
-                let row = frm.add_child('items', { 
-                    item_code: "Trade In",
-                    item_name: "Trade In",
-                    income_account: "Trade In Control - TC", // Set income account
-                    uom: "Nos", // Set unit of measure
-                    qty: 1, // Set quantity to 1
-                    description: "Trade-In" // Set description
+                // Fetch the company's custom_trade_in_control_account
+                frappe.db.get_value('Company', frm.doc.company, 'custom_trade_in_control_account', (data) => {
+                    const incomeAccount = data.custom_trade_in_control_account || "Default Income Account"; // Provide a default if not set
+                    
+                    // Add a new row with "Trade In"
+                    let row = frm.add_child('items', { 
+                        item_code: "Trade In",
+                        item_name: "Trade In",
+                        income_account: incomeAccount, // Set income account dynamically
+                        uom: "Nos", // Set unit of measure
+                        qty: 1, // Set quantity to 1
+                        description: "Trade-In" // Set description
+                    });
+                    frm.refresh_field('items');
                 });
-                frm.refresh_field('items');
             }
         } else {
             // Confirm before removing "Trade In"
@@ -96,6 +101,7 @@ function calculate_row_trade_in_value(frm, cdt, cdn) {
 // Function to set trade-in fields read-only based on conditions
 function set_trade_in_fields_readonly(frm) {
     frm.doc.items.forEach((row) => {
+        // Access the specific field in the child table
         var dfItemCode = frappe.meta.get_docfield("Sales Invoice Item", "item_code", row.name);
         var dfItemName = frappe.meta.get_docfield("Sales Invoice Item", "item_name", row.name);
         var dfRate = frappe.meta.get_docfield("Sales Invoice Item", "rate", row.name);
@@ -103,20 +109,23 @@ function set_trade_in_fields_readonly(frm) {
         var dfSpecialRate = frappe.meta.get_docfield("Sales Invoice Item", "posa_special_rate", row.name);
 
         if (row.item_code === "Trade In") {
-            dfItemCode.read_only = 1;
-            dfItemName.read_only = 1;
-            dfRate.read_only = 1;
-            dfDiscount.read_only = 1;
-            dfSpecialRate.read_only = 1;
+            // Make fields read-only for Trade In items
+            dfItemCode.read_only = 1;        // Set item_code to read-only
+            dfItemName.read_only = 1;        // Set item_name to read-only
+            dfRate.read_only = 1;            // Set rate to read-only
+            dfDiscount.read_only = 1;        // Set posa_special_discount to read-only
+            dfSpecialRate.read_only = 1;     // Set posa_special_rate to read-only
         } else {
-            dfItemCode.read_only = 0;
-            dfItemName.read_only = 0;
-            dfRate.read_only = 0;
-            dfDiscount.read_only = 0;
-            dfSpecialRate.read_only = 0;
+            // If not Trade In, make fields editable
+            dfItemCode.read_only = 0;        // Make item_code editable
+            dfItemName.read_only = 0;        // Make item_name editable
+            dfRate.read_only = 0;            // Make rate editable
+            dfDiscount.read_only = 0;        // Make posa_special_discount editable
+            dfSpecialRate.read_only = 0;     // Make posa_special_rate editable
         }
     });
 
+    // Refresh the child table to reflect changes
     frm.refresh_field('items');
 }
 
@@ -124,9 +133,11 @@ function set_trade_in_fields_readonly(frm) {
 function set_item_fields_editable(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
 
+    // Call to set fields read-only if item code is Trade In
     if (row.item_code === "Trade In") {
         set_trade_in_fields_readonly(frm);
     } else {
+        // Make fields editable for the current row
         var df = frappe.meta.get_docfield("Sales Invoice Item", "item_code", row.name);
         df.read_only = 0;
 
@@ -137,8 +148,9 @@ function set_item_fields_editable(frm, cdt, cdn) {
         dfDiscount.read_only = 0;
 
         var dfSpecialRate = frappe.meta.get_docfield("Sales Invoice Item", "posa_special_rate", row.name);
-        dfSpecialRate.read_only = 0;
+        dfSpecialRate.read_only = 0; // Make posa_special_rate editable
 
+        // Refresh fields to reflect changes
         frm.refresh_field('items');
     }
 }

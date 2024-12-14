@@ -12,21 +12,19 @@ def execute():
     # Construct the parent account name with the company abbreviation
     parent_account = f'Stock Expenses - {company_abbr}'
 
-    # Check if the "Trade In Control" account already exists
-    control_account = frappe.get_all('Account', filters={'name': 'Trade In Control'}, limit=1)
+    # Check if the "Trade In Control" account already exists using account_name
+    control_account = frappe.get_all('Account', filters={'account_name': 'Trade In Control'}, limit=1)
 
     if not control_account:
         # Create the new Trade In Control Account
         account = frappe.get_doc({
             'doctype': 'Account',
-            'name': 'Trade In Control',
             'account_type': 'Expense Account',  # Specify the type as needed
             'parent_account': parent_account,  # Use the dynamically constructed parent account
             'is_group': 0,
             'company': default_company,  # Use the default company retrieved
             'disabled': 0,
             'account_name': 'Trade In Control',  # Ensure the account name is set
-            'account_number': 'TC-001'  # Provide a default account number or set accordingly
         })
         account.insert()
         frappe.db.commit()  # Commit the transaction

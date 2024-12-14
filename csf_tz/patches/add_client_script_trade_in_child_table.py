@@ -38,6 +38,10 @@ frappe.ui.form.on('Sales Invoice', {
                     });
                     frm.refresh_field('items');
                 });
+                frm.fields_dict.items.grid.update_docfield_property('rate', 'read_only', 1);
+                frm.fields_dict.items.grid.update_docfield_property('price_list_rate', 'read_only', 1);
+                frm.fields_dict.items.grid.update_docfield_property('posa_special_discount', 'read_only', 1);
+                frm.fields_dict.items.grid.update_docfield_property('posa_special_rate', 'read_only', 1);
             }
         } else {
             // Confirm before removing "Trade In"
@@ -109,6 +113,10 @@ function set_trade_in_fields_readonly(frm) {
         var dfSpecialRate = frappe.meta.get_docfield("Sales Invoice Item", "posa_special_rate", row.name);
 
         if (row.item_code === "Trade In") {
+                frm.fields_dict.items.grid.update_docfield_property('rate', 'read_only', 1);
+                 frm.fields_dict.items.grid.update_docfield_property('price_list_rate', 'read_only', 1);
+                frm.fields_dict.items.grid.update_docfield_property('posa_special_discount', 'read_only', 1);
+                frm.fields_dict.items.grid.update_docfield_property('posa_special_rate', 'read_only', 1);
             // Make fields read-only for Trade In items
             dfItemCode.read_only = 1;        // Set item_code to read-only
             dfItemName.read_only = 1;        // Set item_name to read-only

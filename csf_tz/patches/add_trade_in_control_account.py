@@ -24,7 +24,9 @@ def execute():
             'parent_account': parent_account,  # Use the dynamically constructed parent account
             'is_group': 0,
             'company': default_company,  # Use the default company retrieved
-            'disabled': 0
+            'disabled': 0,
+            'account_name': 'Trade In Control',  # Ensure the account name is set
+            'account_number': 'TC-001'  # Provide a default account number or set accordingly
         })
         account.insert()
         frappe.db.commit()  # Commit the transaction

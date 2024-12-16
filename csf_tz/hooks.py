@@ -102,6 +102,11 @@ doctype_list_js = {
 
 # before_install = "csf_tz.install.before_install"
 after_install = [
+   "csf_tz.patches.add_trade_in_item.execute",
+   "csf_tz.patches.add_trade_in_control_account.execute",
+   "csf_tz.patches.add_client_script_trade_in_child_table.execute",
+   "csf_tz.patches.add_server_scripts_for_trade_in.execute",
+   "csf_tz.patches.custom_fields.create_custom_fields_for_trade_in_feature.execute",
     "csf_tz.patches.custom_fields.custom_fields_for_removed_edu_fields_in_csf_tz.execute",
     "csf_tz.patches.remove_stock_entry_qty_field.execute",
     "csf_tz.patches.remove_core_doctype_custom_docperm.execute",
@@ -301,6 +306,10 @@ scheduler_events = {
 }
 
 jinja = {"methods": ["csf_tz.custom_api.generate_qrcode"]}
+
+
+
+
 
 # Testing
 # -------

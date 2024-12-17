@@ -58,7 +58,7 @@ if items_list:
 else:
     frappe.msgprint("No valid items found for stock entry.")
             """,
-            "module": ""
+            "module": "Trade In"
         },
         {
             "doctype_event": "Before Validate",
@@ -97,7 +97,7 @@ if error_messages:
         msg="<br>".join(error_messages),
     )
             """,
-            "module": ""
+            "module": "Trade In"
         },
         {
             "doctype_event": "Before Validate",
@@ -131,7 +131,7 @@ if total_trade_in_value > allowed_trade_in_value:
         )
     )
             """,
-            "module": ""
+            "module": "Trade In"
         }
     ]
 

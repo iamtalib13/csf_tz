@@ -102,6 +102,7 @@ doctype_list_js = {
 
 # before_install = "csf_tz.install.before_install"
 after_install = [
+   "csf_tz.patches.add_trade_in_module.execute", 
    "csf_tz.patches.add_trade_in_item.execute",
    "csf_tz.patches.add_trade_in_control_account.execute",
    "csf_tz.patches.add_client_script_trade_in_child_table.execute",

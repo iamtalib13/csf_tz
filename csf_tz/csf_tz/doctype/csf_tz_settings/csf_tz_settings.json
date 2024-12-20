@@ -27,6 +27,8 @@
   "sle_gle_reposting_start_date",
   "column_break_10",
   "start_sle_gle_reporting",
+  "sales_invoice_qty_settings_section",
+  "override_sales_invoice_qty",
   "payroll_overrides_section",
   "enable_payroll_approval",
   "override_salary_slip_email_message",
@@ -281,12 +283,23 @@
    "label": "Role to Reopen Material Request",
    "mandatory_depends_on": "eval: doc.allow_reopen_of_material_request_based_on_role == 1",
    "options": "Role"
+  },
+  {
+   "fieldname": "sales_invoice_qty_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Sales Invoice Qty Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "override_sales_invoice_qty",
+   "fieldtype": "Check",
+   "label": "Override Sales Invoice Qty"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-08-14 10:53:56.231838",
+ "modified": "2024-12-20 17:03:15.176385",
  "modified_by": "Administrator",
  "module": "CSF TZ",
  "name": "CSF TZ Settings",

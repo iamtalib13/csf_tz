@@ -128,12 +128,12 @@ def custom_get_item_details(args, doc=None, for_validate=False, overwrite_wareho
 
     out = remove_standard_fields(out)
 
-    # Remove qty from the response
-    out.pop("qty", None)
+    # Check CSF TZ Settings using frappe.db.get_single_value and remove qty if enabled
+    override_sales_invoice_qty = frappe.db.get_single_value("CSF TZ Settings", "override_sales_invoice_qty")
+    if override_sales_invoice_qty:
+        out.pop("qty", None)
 
     return out
-
-
 
 
 

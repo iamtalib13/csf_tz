@@ -5,7 +5,8 @@ import frappe
 import os
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.pdf import get_pdf, cleanup
-from PyPDF3 import PdfFileWriter
+from io import BytesIO
+from PyPDF3 import PdfFileReader, PdfFileWriter
 from csf_tz import console
 from frappe.model.workflow import apply_workflow
 from frappe.utils import cint, flt
@@ -153,22 +154,30 @@ def download_multi_pdf(doctype, name, format=None, no_letterhead=0):
             for doc_name in doctype[doctype_name]:
                 try:
                     console(doc_name)
-                    output = frappe.get_print(
+                    pdf_data = frappe.get_print(
                         doctype_name,
                         doc_name,
                         format,
                         as_pdf=True,
-                        output=output,
+                        output=None,
                         no_letterhead=no_letterhead,
                     )
+
+                    # Convert the PDF bytes into a file-like object
+                    pdf_file = BytesIO(pdf_data)
+
+                    # Create a PdfFileReader from the byte stream (file-like object)
+                    reader = PdfFileReader(pdf_file)
+
+                    # Add each page from the reader to the writer
+                    for page_num in range(reader.getNumPages()):
+                        output.addPage(reader.getPage(page_num))
+
                 except Exception:
                     frappe.log_error(
-                        "Permission Error on doc {} of doctype {}".format(
-                            doc_name, doctype_name
-                        )
+                        f"Permission Error on doc {doc_name} of doctype {doctype_name}"
                     )
-        frappe.local.response.filename = "{}.pdf".format(name)
-
+        frappe.local.response.filename = f"{name}.pdf"
     return read_multi_pdf(output)
 
 

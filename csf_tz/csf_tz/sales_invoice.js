@@ -25,7 +25,6 @@ frappe.ui.form.on("Sales Invoice", {
     }
     frm.trigger("set_pos");
     frm.trigger("make_sales_invoice_btn");
-    // set_trade_in_fields_readonly(frm);
   },
   onload: function (frm) {
     frm.trigger("set_pos");
@@ -38,7 +37,6 @@ frappe.ui.form.on("Sales Invoice", {
       }
     }
     // frm.trigger("update_stock");
-    //set_trade_in_fields_readonly(frm);
   },
   customer: function (frm) {
     setTimeout(function () {
@@ -138,6 +136,7 @@ frappe.ui.form.on("Sales Invoice", {
         }
       });
   },
+
   custom_is_trade_in: function (frm) {
     if (frm.doc.custom_is_trade_in) {
       // Check if "Trade In" item is already added

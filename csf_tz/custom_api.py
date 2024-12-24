@@ -351,24 +351,28 @@ def get_item_prices(item_code, currency, customer=None, company=None):
             prices_list.append(item_dict)
     return prices_list
 
-
 @frappe.whitelist()
-def get_item_prices_custom(*args):
-    filters = args[5]
-    start = args[3]
-    limit = args[4]
+def get_item_prices_custom(filters=None, start=0, limit=20):
+    if isinstance(filters, str):  # If filters is a string, deserialize it
+        import json
+        try:
+            filters = json.loads(filters)
+        except json.JSONDecodeError:
+            frappe.throw("Invalid format for filters. Ensure it's a valid JSON object.")
+
+    if not filters:  # Default to an empty dictionary if filters is None or invalid
+        filters = {}
+
     unique_records = int(frappe.db.get_value("CSF TZ Settings", None, "unique_records"))
-    if "customer" in filters:
-        customer = filters["customer"]
-    else:
-        customer = ""
-    company = filters["company"]
-    item_code = "'{0}'".format(filters["item_code"])
-    currency = "'{0}'".format(filters["currency"])
+    customer = filters.get("customer", "")
+    company = filters.get("company", "")
+    item_code = "'{0}'".format(filters.get("item_code", ""))
+    currency = "'{0}'".format(filters.get("currency", ""))
     prices_list = []
     unique_price_list = []
     max_records = int(start) + int(limit)
     conditions = ""
+    
     if "posting_date" in filters:
         posting_date = filters["posting_date"]
         from_date = "'{from_date}'".format(from_date=posting_date[1][0])
@@ -380,17 +384,17 @@ def get_item_prices_custom(*args):
         conditions += " AND SI.customer = '%s'" % customer
 
     query = """ SELECT SI.name, SI.posting_date, SI.customer, SIT.item_code, SIT.qty,  SIT.rate
-            FROM `tabSales Invoice` AS SI 
-            INNER JOIN `tabSales Invoice Item` AS SIT ON SIT.parent = SI.name
-            WHERE 
-                SIT.item_code = {0} 
-                AND SIT.parent = SI.name
-                AND SI.docstatus= 1
-                AND SI.currency = {2}
-                AND SI.is_return != 1
-                AND SI.company = '{3}'
-                {1}
-            ORDER by SI.posting_date DESC""".format(
+                FROM `tabSales Invoice` AS SI 
+                INNER JOIN `tabSales Invoice Item` AS SIT ON SIT.parent = SI.name
+                WHERE 
+                    SIT.item_code = {0} 
+                    AND SIT.parent = SI.name
+                    AND SI.docstatus= 1
+                    AND SI.currency = {2}
+                    AND SI.is_return != 1
+                    AND SI.company = '{3}'
+                    {1}
+                ORDER by SI.posting_date DESC""".format(
         item_code, conditions, currency, company
     )
 
@@ -2756,6 +2760,128 @@ def target_warehouse_based_price_list(doc, method):
             item.rate = rate
             item.amount = item.qty * rate
 
+@frappe.whitelist()
+def get_item_prices_custom_po(filters=None, start=0, limit=20):
+    if isinstance(filters, str):  # If filters is a string, deserialize it
+        import json
+        try:
+            filters = json.loads(filters)
+        except json.JSONDecodeError:
+            frappe.throw("Invalid format for filters. Ensure it's a valid JSON object.")
+
+    if not filters:  # Default to an empty dictionary if filters is None or invalid
+        filters = {}
+
+    unique_records = int(frappe.db.get_value("CSF TZ Settings", None, "unique_records"))
+    customer = filters.get("customer", "")
+    company = filters.get("company", "")
+    item_code = "'{0}'".format(filters.get("item_code", ""))
+    currency = "'{0}'".format(filters.get("currency", ""))
+    prices_list = []
+    unique_price_list = []
+    max_records = int(start) + int(limit)
+    conditions = ""
+    
+    if "posting_date" in filters:
+        posting_date = filters["posting_date"]
+        from_date = "'{from_date}'".format(from_date=posting_date[1][0])
+        to_date = "'{to_date}'".format(to_date=posting_date[1][1])
+        conditions += "AND DATE(PI.posting_date) BETWEEN {start} AND {end}".format(
+            start=from_date, end=to_date
+        )
+    if customer:
+        conditions += " AND PI.supplier = '%s'" % customer
+
+    query = """ SELECT PI.name, PI.posting_date, PI.supplier, PIT.item_code, PIT.qty,  PIT.rate
+                FROM `tabPurchase Invoice` AS PI 
+                INNER JOIN `tabPurchase Invoice Item` AS PIT ON PIT.parent = PI.name
+                WHERE 
+                    PIT.item_code = {0} 
+                    AND PIT.parent = PI.name
+                    AND PI.docstatus= 1
+                    AND PI.currency = {2}
+                    AND PI.is_return != 1
+                    AND PI.company = '{3}'
+                    {1}
+                ORDER by PI.posting_date DESC""".format(
+        item_code, conditions, currency, company
+    )
+
+    items = frappe.db.sql(query, as_dict=True)
+    for item in items:
+        item_dict = {
+            "name": item.item_code,
+            "item_code": item.item_code,
+            "rate": item.rate,
+            "posting_date": item.posting_date,
+            "invoice": item.name,
+            "customer": item.customer,
+            "qty": item.qty,
+        }
+        if (
+            unique_records == 1
+            and item.rate not in unique_price_list
+            and len(prices_list) <= max_records
+        ):
+            unique_price_list.append(item.rate)
+            prices_list.append(item_dict)
+        elif unique_records != 1 and item.rate and len(prices_list) <= max_records:
+            prices_list.append(item_dict)
+    return prices_list
+
+@frappe.whitelist()
+def get_item_prices_po(item_code, currency, customer=None, company=None):
+    item_code = "'{0}'".format(item_code)
+    currency = "'{0}'".format(currency)
+    unique_records = int(frappe.db.get_value("CSF TZ Settings", None, "unique_records"))
+    prices_list = []
+    unique_price_list = []
+    max_records = frappe.db.get_value("Company", company, "max_records_in_dialog") or 20
+    if customer:
+        conditions = " and PI.supplier = '%s'" % customer
+    else:
+        conditions = ""
+
+    query = """ SELECT PI.name, PI.posting_date, PI.supplier, PIT.item_code, PIT.qty, PIT.rate
+            FROM `tabPurchase Invoice` AS PI 
+            INNER JOIN `tabPurchase Invoice Item` AS PIT ON PIT.parent = PI.name
+            WHERE 
+                PIT.item_code = {0} 
+                AND PIT.parent = PI.name
+                AND PI.docstatus=%s 
+                AND PI.currency = {2}
+                AND PI.is_return != 1
+                AND PI.company = '{3}'
+                {1}
+            ORDER by PI.posting_date DESC""".format(
+        item_code, conditions, currency, company
+    ) % (
+        1
+    )
+
+    items = frappe.db.sql(query, as_dict=True)
+    for item in items:
+        item_dict = {
+            "name": item.item_code,
+            "item_code": item.item_code,
+            "price": item.rate,
+            "date": item.posting_date,
+            "invoice": item.name,
+            "customer": item.customer,
+            "qty": item.qty,
+        }
+        if (
+            unique_records == 1
+            and item.rate not in unique_price_list
+            and len(prices_list) <= max_records
+        ):
+            unique_price_list.append(item.rate)
+            prices_list.append(item_dict)
+        elif unique_records != 1 and item.rate and len(prices_list) <= max_records:
+            prices_list.append(item_dict)
+    # frappe.throw(str(prices_list))
+    return prices_list
+
 def validate_trade_in_serial_no_and_batch(doc, method):
     error_messages = []
     for row in doc.items:
@@ -2890,4 +3016,4 @@ def create_trade_in_stock_entry(doc, method):
             frappe.db.rollback()
             frappe.throw(f"Error during Stock Entry creation: {str(e)}")
     else:
-        frappe.msgprint("No valid items found for stock entry.")        
+        frappe.msgprint("No valid items found for stock entry.")            

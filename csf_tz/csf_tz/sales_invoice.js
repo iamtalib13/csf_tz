@@ -136,7 +136,7 @@ frappe.ui.form.on("Sales Invoice", {
         }
       });
   },
-
+  // Trade In Feature
   custom_is_trade_in: function (frm) {
     if (frm.doc.custom_is_trade_in) {
       // Fetch the company's abbreviation

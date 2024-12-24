@@ -139,34 +139,39 @@ frappe.ui.form.on("Sales Invoice", {
 
   custom_is_trade_in: function (frm) {
     if (frm.doc.custom_is_trade_in) {
-      // Check if "Trade In" item is already added
-      const exists = frm.doc.items.some(
-        (item) => item.item_code === "Trade In"
-      );
-      if (!exists) {
-        // Add a new row with "Trade In"
-        let row = frm.add_child("items", {
-          item_code: "Trade In",
-          item_name: "Trade In",
-          income_account: "Trade In Control - TC", // Set income account
-          uom: "Nos", // Set unit of measure
-          qty: 1, // Set quantity to 1
-          description: "Trade-In", // Set description
-        });
-        frm.refresh_field("items");
-      }
+      // Fetch the company's abbreviation
+      frappe.db.get_value("Company", frm.doc.company, "abbr", function (res) {
+        const abbr = res ? res.abbr : "";
+
+        // Check if "Trade In" item is already added
+        const exists = frm.doc.items.some(
+          (item) => item.item_code === "Trade In"
+        );
+        if (!exists) {
+          // Add a new row with "Trade In"
+          let row = frm.add_child("items", {
+            item_code: "Trade In",
+            item_name: "Trade In",
+            income_account: `Trade In Control - ${abbr}`, // Set income account dynamically
+            uom: "Nos", // Set unit of measure
+            qty: 1, // Set quantity to 1
+            description: "Trade-In", // Set description
+          });
+          frm.refresh_field("items");
+        }
+      });
     } else {
       // Confirm before removing "Trade In"
       frappe.confirm(
         'Are you sure you want to remove the "Trade In" item?',
-        () => {
+        function () {
           // Remove the "Trade In" item if exists
           frm.doc.items = frm.doc.items.filter(
             (item) => item.item_code !== "Trade In"
           );
           frm.refresh_field("items");
         },
-        () => {
+        function () {
           // Re-check the checkbox if user cancels
           frm.set_value("custom_is_trade_in", 1);
         }

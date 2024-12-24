@@ -105,7 +105,6 @@ after_install = [
    "csf_tz.patches.add_trade_in_module.execute", 
    "csf_tz.patches.add_trade_in_item.execute",
    "csf_tz.patches.add_trade_in_control_account.execute",
-   "csf_tz.patches.add_client_script_trade_in_child_table.execute",
    "csf_tz.patches.add_server_scripts_for_trade_in.execute",
    "csf_tz.patches.custom_fields.create_custom_fields_for_trade_in_feature.execute",
     "csf_tz.patches.custom_fields.custom_fields_for_removed_edu_fields_in_csf_tz.execute",
@@ -162,11 +161,15 @@ doc_events = {
             "csf_tz.custom_api.create_delivery_note",
             "csf_tz.custom_api.check_submit_delivery_note",
             "csf_tz.custom_api.make_withholding_tax_gl_entries_for_sales",
+            "csf_tz.custom_api.create_trade_in_stock_entry",
+            
         ],
         "validate": [
             "csf_tz.custom_api.check_validate_delivery_note",
             "csf_tz.custom_api.validate_items_remaining_qty",
             "csf_tz.custom_api.calculate_price_reduction",
+            "csf_tz.custom_api.validate_trade_in_serial_no_and_batch",
+            "csf_tz.custom_api.validate_trade_in_sales_percentage",
         ],
         "before_cancel": "csf_tz.custom_api.check_cancel_delivery_note",
         "before_insert": "csf_tz.custom_api.batch_splitting",

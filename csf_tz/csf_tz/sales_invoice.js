@@ -25,6 +25,7 @@ frappe.ui.form.on("Sales Invoice", {
     }
     frm.trigger("set_pos");
     frm.trigger("make_sales_invoice_btn");
+    // set_trade_in_fields_readonly(frm);
   },
   onload: function (frm) {
     frm.trigger("set_pos");
@@ -37,6 +38,7 @@ frappe.ui.form.on("Sales Invoice", {
       }
     }
     // frm.trigger("update_stock");
+    //set_trade_in_fields_readonly(frm);
   },
   customer: function (frm) {
     setTimeout(function () {
@@ -136,6 +138,42 @@ frappe.ui.form.on("Sales Invoice", {
         }
       });
   },
+  custom_is_trade_in: function (frm) {
+    if (frm.doc.custom_is_trade_in) {
+      // Check if "Trade In" item is already added
+      const exists = frm.doc.items.some(
+        (item) => item.item_code === "Trade In"
+      );
+      if (!exists) {
+        // Add a new row with "Trade In"
+        let row = frm.add_child("items", {
+          item_code: "Trade In",
+          item_name: "Trade In",
+          income_account: "Trade In Control - TC", // Set income account
+          uom: "Nos", // Set unit of measure
+          qty: 1, // Set quantity to 1
+          description: "Trade-In", // Set description
+        });
+        frm.refresh_field("items");
+      }
+    } else {
+      // Confirm before removing "Trade In"
+      frappe.confirm(
+        'Are you sure you want to remove the "Trade In" item?',
+        () => {
+          // Remove the "Trade In" item if exists
+          frm.doc.items = frm.doc.items.filter(
+            (item) => item.item_code !== "Trade In"
+          );
+          frm.refresh_field("items");
+        },
+        () => {
+          // Re-check the checkbox if user cancels
+          frm.set_value("custom_is_trade_in", 1);
+        }
+      );
+    }
+  },
 });
 
 frappe.ui.form.on("Sales Invoice Item", {
@@ -169,6 +207,36 @@ frappe.ui.form.on("Sales Invoice Item", {
       .then((r) => {
         frm.refresh();
       });
+  },
+  // Trade In Feature
+  custom_trade_in_qty: function (frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+    calculate_row_trade_in_value(frm, cdt, cdn);
+  },
+  custom_trade_in_item: function (frm, cdt, cdn) {
+    // Reset serial numbers when item changes
+    frappe.model.set_value(cdt, cdn, "custom_trade_in_serial_no", "");
+  },
+  custom_trade_in_incoming_rate: function (frm, cdt, cdn) {
+    calculate_row_trade_in_value(frm, cdt, cdn);
+  },
+  item_code: function (frm, cdt, cdn) {
+    set_trade_in_fields_readonly(frm);
+  },
+  form_render(frm, cdt, cdn) {
+    // Get the current child table row document
+    let row = locals[cdt][cdn];
+
+    // Debugging: Log the row and frm
+    // console.log("Row data:", row);
+    // console.log("Form data:", frm);
+
+    // Ensure row is defined before calling the function
+    if (row) {
+      set_trade_in_fields_readonly(frm, row);
+    } else {
+      // console.error("Row is undefined.");
+    }
   },
 });
 
@@ -268,3 +336,99 @@ frappe.ui.keys.add_shortcut({
   description: __("Select Item Price"),
   ignore_inputs: true,
 });
+
+// Calculate custom_total_trade_in_value for a specific row in the items child table
+function calculate_row_trade_in_value(frm, cdt, cdn) {
+  let row = locals[cdt][cdn];
+
+  // Calculate custom_total_trade_in_value as custom_trade_in_qty * custom_trade_in_incoming_rate
+  let total_value =
+    (row.custom_trade_in_qty || 0) * (row.custom_trade_in_incoming_rate || 0);
+  frappe.model.set_value(cdt, cdn, "custom_total_trade_in_value", total_value);
+
+  // Set rate field as negative
+  frappe.model.set_value(cdt, cdn, "rate", total_value * -1); // Set rate to negative value
+}
+// Function to set trade-in fields read-only based on conditions
+function set_trade_in_fields_readonly(frm, row) {
+  // Log the item code for debugging
+  if (!row || !row.item_code) {
+    //console.error("Row or item_code is undefined.");
+    return; // Exit if row or item_code is not defined
+  }
+
+  //console.log("Checking item code:", row.item_code);
+
+  if (row.item_code === "Trade In") {
+    //console.log("Trade In item found in child table.");
+
+    // Set fields to read-only for the "Trade In" item
+    frm.fields_dict.items.grid.update_docfield_property(
+      "item_name",
+      "read_only",
+      1,
+      row.idx
+    );
+    frm.fields_dict.items.grid.update_docfield_property(
+      "rate",
+      "read_only",
+      1,
+      row.idx
+    );
+    frm.fields_dict.items.grid.update_docfield_property(
+      "posa_special_discount",
+      "read_only",
+      1,
+      row.idx
+    );
+    frm.fields_dict.items.grid.update_docfield_property(
+      "posa_special_rate",
+      "read_only",
+      1,
+      row.idx
+    );
+    frm.fields_dict.items.grid.update_docfield_property(
+      "qty",
+      "read_only",
+      1,
+      row.idx
+    );
+  } else {
+    //console.log("Non Trade In item found:", row.item_code);
+
+    // Set fields to editable for non "Trade In" items
+    frm.fields_dict.items.grid.update_docfield_property(
+      "item_name",
+      "read_only",
+      0,
+      row.idx
+    );
+    frm.fields_dict.items.grid.update_docfield_property(
+      "rate",
+      "read_only",
+      0,
+      row.idx
+    );
+    frm.fields_dict.items.grid.update_docfield_property(
+      "posa_special_discount",
+      "read_only",
+      0,
+      row.idx
+    );
+    frm.fields_dict.items.grid.update_docfield_property(
+      "posa_special_rate",
+      "read_only",
+      0,
+      row.idx
+    );
+    frm.fields_dict.items.grid.update_docfield_property(
+      "qty",
+      "read_only",
+      0,
+      row.idx
+    );
+  }
+
+  // Refresh the row to reflect the changes
+  frm.refresh_field("items");
+}

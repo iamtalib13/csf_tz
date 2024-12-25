@@ -9,6 +9,7 @@ def execute():
                 "fieldtype": "Section Break",
                 "insert_after": "page_break",
                 "label": "Trade In Details",
+                "depnds_on": "eval:doc.item_code == \"Trade In\""
             },
             {
                 "fieldname": "custom_trade_in_item",
@@ -72,6 +73,16 @@ def execute():
                 "insert_after": "update_stock",
                 "label": "Is Trade In",
                 "depends_on": "eval:doc.customer"
+            }
+        ],
+         "Stock Entry": [
+            {
+                "fieldname": "custom_sales_invoice",
+                "fieldtype": "Link",
+                "options": "Sales Invoice",
+                "insert_after": "Stock Entry Type",
+                "label": "Sales Invoice",
+                "depends_on": "eval:doc.stock_entry_type == 'Material Receipt'"
             }
         ],
         "Company": [

@@ -28,6 +28,4 @@ csf_tz.patches.update_payware_settings_values_to_csf_tz_settings
 csf_tz.patches.add_trade_in_module
 csf_tz.patches.add_trade_in_item
 csf_tz.patches.add_trade_in_control_account
-csf_tz.patches.add_client_script_trade_in_child_table
-csf_tz.patches.add_server_scripts_for_trade_in
 csf_tz.patches.custom_fields.create_custom_fields_for_trade_in_feature

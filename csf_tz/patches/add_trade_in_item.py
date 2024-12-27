@@ -25,6 +25,7 @@ def execute():
             'item_code': 'Trade In',
             'item_name': 'Trade In',
             'item_group': 'Trade In',  # Use the created item group
+            'stock_uom' : 'Nos',
             'disabled': 0,
         })
         item.insert()

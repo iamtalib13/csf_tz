@@ -1,35 +1,32 @@
 import frappe
 
 def execute():
-    # Check if the "Trade In" Item Group exists
-    item_group = frappe.get_all('Item Group', filters={'name': 'Trade In'}, limit=1)
-    
-    # Create "Trade In" Item Group if it doesn't exist
-    if not item_group:
-        item_group_doc = frappe.get_doc({
-            'doctype': 'Item Group',
-            'item_group_name': 'Trade In',
-            'is_group': 0  # Set to 0 for a non-group item group
-        })
-        item_group_doc.insert()
-        frappe.db.commit()  # Commit the transaction
-        print("Item Group 'Trade In' created successfully.")
-    
-    # Check if the "Trade In" item already exists
-    trade_in_item = frappe.get_all('Item', filters={'item_code': 'Trade In'}, limit=1)
-    
-    if not trade_in_item:
-        # Create the new Trade In Item
-        item = frappe.get_doc({
-            'doctype': 'Item',
-            'item_code': 'Trade In',
-            'item_name': 'Trade In',
-            'item_group': 'Trade In',  # Use the created item group
-            'stock_uom' : 'Nos',
-            'disabled': 0,
-        })
-        item.insert()
-        frappe.db.commit()  # Commit the transaction
-        print("Trade In item created successfully.")
-    else:
-        print("Trade In item already exists.")
+    try:
+        # Check if the "All Item Groups" Item Group exists
+        item_group = frappe.get_all('Item Group', filters={'name': 'All Item Groups'}, limit=1)
+        
+        if not item_group:
+            # Skip item creation if the Item Group does not exist
+            print("Item Group 'All Item Groups' does not exist. Skipping item creation.")
+            return
+
+        # Check if the "Trade In" item already exists
+        trade_in_item = frappe.get_all('Item', filters={'item_code': 'Trade In'}, limit=1)
+        
+        if not trade_in_item:
+            item = frappe.get_doc({
+                'doctype': 'Item',
+                'item_code': 'Trade In',
+                'item_name': 'Trade In',
+                'item_group': 'All Item Groups',  
+                'stock_uom': 'Nos',
+                'disabled': 0,
+            })
+            item.insert()
+            frappe.db.commit()
+            print("Trade In item created successfully.")
+        else:
+            print("Trade In item already exists.")
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Error in Item Creation Script")
+        print(f"An error occurred: {str(e)}")

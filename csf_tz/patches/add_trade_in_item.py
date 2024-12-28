@@ -28,5 +28,5 @@ def execute():
         else:
             print("Trade In item already exists.")
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Error in Item Creation Script")
+        frappe.log_error(message=frappe.get_traceback(), title="Error in Trade-In Item Creation Script")
         print(f"An error occurred: {str(e)}")

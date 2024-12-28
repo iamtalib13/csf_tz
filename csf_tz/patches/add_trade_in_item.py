@@ -21,6 +21,7 @@ def execute():
                 'item_group': 'All Item Groups',  
                 'stock_uom': 'Nos',
                 'disabled': 0,
+                "is_stock_item": 0,
             })
             item.insert()
             frappe.db.commit()

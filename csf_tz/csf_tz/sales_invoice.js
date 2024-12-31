@@ -25,6 +25,7 @@ frappe.ui.form.on("Sales Invoice", {
     }
     frm.trigger("set_pos");
     frm.trigger("make_sales_invoice_btn");
+    frm.trigger("set_trade_in_field_visibility");
   },
   onload: function (frm) {
     frm.trigger("set_pos");
@@ -37,6 +38,7 @@ frappe.ui.form.on("Sales Invoice", {
       }
     }
     // frm.trigger("update_stock");
+    frm.trigger("set_trade_in_field_visibility");
   },
   customer: function (frm) {
     setTimeout(function () {
@@ -136,7 +138,18 @@ frappe.ui.form.on("Sales Invoice", {
         }
       });
   },
+
   // Trade In Feature
+  set_trade_in_field_visibility: function (frm) {
+    // Fetch the Enable Trade In setting from CSF TZ Settings using get_single_value
+    frappe.db
+      .get_single_value("CSF TZ Settings", "enable_trade_in")
+      .then((enable_trade_in) => {
+        // Show or hide the Custom Is Trade-In checkbox based on the setting
+        frm.set_df_property("custom_is_trade_in", "hidden", !enable_trade_in);
+      });
+  },
+
   custom_is_trade_in: function (frm) {
     if (frm.doc.custom_is_trade_in) {
       // Fetch the company's abbreviation

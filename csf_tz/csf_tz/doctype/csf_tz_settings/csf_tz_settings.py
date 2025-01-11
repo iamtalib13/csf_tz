@@ -6,10 +6,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.installer import update_site_config
-from csf_tz.patches.add_trade_in_module import execute as add_trade_in_module
-from csf_tz.patches.add_trade_in_item import execute as add_trade_in_item
-from csf_tz.patches.add_trade_in_control_account import execute as add_trade_in_control_account
-from csf_tz.patches.delete_trade_in_item_and_account import execute as delete_trade_in_item_and_account
+from csf_tz.trade_in.utils import (
+    add_trade_in_module,
+    add_trade_in_item,
+    add_trade_in_control_account,
+    delete_trade_in_item_and_account
+)
+
 
 
 class CSFTZSettings(Document):

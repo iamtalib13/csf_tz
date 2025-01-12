@@ -27,6 +27,8 @@
   "sle_gle_reposting_start_date",
   "column_break_10",
   "start_sle_gle_reporting",
+  "trade_in_settings_section",
+  "enable_trade_in",
   "sales_invoice_qty_settings_section",
   "override_sales_invoice_qty",
   "payroll_overrides_section",
@@ -294,12 +296,24 @@
    "fieldname": "override_sales_invoice_qty",
    "fieldtype": "Check",
    "label": "Override Sales Invoice Qty"
+  },
+  {
+   "fieldname": "trade_in_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Trade In Settings"
+  },
+  {
+   "default": "0",
+   "description": "Enable this feature to handle trade-in items directly within Sales Invoices.",
+   "fieldname": "enable_trade_in",
+   "fieldtype": "Check",
+   "label": "Enable Trade In"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-12-20 17:03:15.176385",
+ "modified": "2024-12-31 15:59:11.939749",
  "modified_by": "Administrator",
  "module": "CSF TZ",
  "name": "CSF TZ Settings",

@@ -102,9 +102,6 @@ doctype_list_js = {
 
 # before_install = "csf_tz.install.before_install"
 after_install = [
-   "csf_tz.patches.add_trade_in_module.execute", 
-   "csf_tz.patches.add_trade_in_item.execute",
-   "csf_tz.patches.add_trade_in_control_account.execute",
    "csf_tz.patches.custom_fields.create_custom_fields_for_trade_in_feature.execute",
     "csf_tz.patches.custom_fields.custom_fields_for_removed_edu_fields_in_csf_tz.execute",
     "csf_tz.patches.remove_stock_entry_qty_field.execute",

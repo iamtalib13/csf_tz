@@ -9,7 +9,8 @@ def execute():
                 "fieldtype": "Section Break",
                 "insert_after": "page_break",
                 "label": "Trade In Details",
-                "depnds_on": "eval:doc.item_code == \"Trade In\""
+                "depnds_on": "eval:doc.item_code == \"Trade In\"",
+               
             },
             {
                 "fieldname": "custom_trade_in_item",
@@ -17,14 +18,16 @@ def execute():
                 "insert_after": "custom_trade_in_details",
                 "label": "Item",
                 "options": "Item",
-                "mandatory_depends_on": "eval:doc.item_code == \"Trade In\""
+                "mandatory_depends_on": "eval:doc.item_code == \"Trade In\"",
+                "no_copy": 1
             },
             {
                 "fieldname": "custom_trade_in_qty",
                 "fieldtype": "Float",
                 "insert_after": "custom_trade_in_item",
                 "label": "Qty",
-                "mandatory_depends_on": "eval:doc.item_code == \"Trade In\""
+                "mandatory_depends_on": "eval:doc.item_code == \"Trade In\"",
+                "no_copy": 1
             },
             {
                 "fieldname": "custom_trade_in_uom",
@@ -32,6 +35,7 @@ def execute():
                 "insert_after": "custom_trade_in_qty",
                 "label": "UOM",
                 "options": "UOM",
+                "no_copy": 1
             },
             {
                 "fieldname": "custom_trade_in_column",
@@ -44,7 +48,8 @@ def execute():
                 "fieldtype": "Currency",
                 "insert_after": "custom_trade_in_column",
                 "label": "Incoming Rate",
-                "mandatory_depends_on": "eval:doc.item_code == \"Trade In\""
+                "mandatory_depends_on": "eval:doc.item_code == \"Trade In\"",
+                "no_copy": 1
             },
             {
                 "fieldname": "custom_total_trade_in_value",
@@ -52,18 +57,21 @@ def execute():
                 "insert_after": "custom_trade_in_incoming_rate",
                 "label": "Total Trade In Value",
                 "read_only": 1,
+                "no_copy": 1
             },
             {
                 "fieldname": "custom_trade_in_batch_no",
                 "fieldtype": "Data",
                 "insert_after": "custom_total_trade_in_value",
                 "label": "Trade In Batch No",
+                "no_copy": 1
             },
             {
                 "fieldname": "custom_trade_in_serial_no",
                 "fieldtype": "Small Text",
                 "insert_after": "custom_trade_in_batch_no",
                 "label": "Trade In Serial No",
+                "no_copy": 1
             }
         ],
         "Sales Invoice": [
@@ -72,7 +80,8 @@ def execute():
                 "fieldtype": "Check",
                 "insert_after": "update_stock",
                 "label": "Is Trade In",
-                "depends_on": "eval:doc.customer"
+                "depends_on": "eval:doc.customer",
+                "no_copy": 1
             }
         ],
          "Stock Entry": [
@@ -82,7 +91,8 @@ def execute():
                 "options": "Sales Invoice",
                 "insert_after": "Stock Entry Type",
                 "label": "Sales Invoice",
-                "depends_on": "eval:doc.stock_entry_type == 'Material Receipt'"
+                "depends_on": "eval:doc.stock_entry_type == 'Material Receipt'",
+                "no_copy": 1
             }
         ],
         "Company": [

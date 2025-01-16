@@ -89,7 +89,7 @@ def execute():
                 "fieldname": "custom_sales_invoice",
                 "fieldtype": "Link",
                 "options": "Sales Invoice",
-                "insert_after": "Stock Entry Type",
+                "insert_after": "stock_entry_type",
                 "label": "Sales Invoice",
                 "depends_on": "eval:doc.stock_entry_type == 'Material Receipt'",
                 "no_copy": 1

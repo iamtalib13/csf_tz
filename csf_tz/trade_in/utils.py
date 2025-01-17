@@ -16,6 +16,7 @@ def add_trade_in_module():
         print("Trade In Module created successfully.")
     else:
         print("Trade In Module already exists.")
+        
 
 def add_trade_in_item():
     try:
@@ -29,8 +30,9 @@ def add_trade_in_item():
 
         # Check if the "Trade In" item already exists
         trade_in_item = frappe.get_all('Item', filters={'item_code': 'Trade In'}, limit=1)
-        
+
         if not trade_in_item:
+            # Create a new Trade In item
             item = frappe.get_doc({
                 'doctype': 'Item',
                 'item_code': 'Trade In',
@@ -38,15 +40,26 @@ def add_trade_in_item():
                 'item_group': 'All Item Groups',  
                 'stock_uom': 'Nos',
                 'disabled': 0,
+                'is_stock_item': 0,
             })
             item.insert()
             frappe.db.commit()
             print("Trade In item created successfully.")
         else:
-            print("Trade In item already exists.")
+            # If the item exists, update its values and enable it
+            item_doc = frappe.get_doc('Item', trade_in_item[0].name)  # Get the existing item document
+            item_doc.item_name = 'Trade In'  # Update the item name if needed
+            item_doc.item_group = 'All Item Groups'  # Ensure the item group is correct
+            item_doc.disabled = 0  # Enable the item
+            item_doc.is_stock_item = 0  # Set stock item status
+            
+            item_doc.save()  # Save the updated item
+            frappe.db.commit()
+            print("Trade In item already exists. Updated and enabled successfully.")
     except Exception as e:
         frappe.log_error(message=frappe.get_traceback(), title="Error in Trade-In Item Creation Script")
         print(f"An error occurred: {str(e)}")
+
 
 
 def add_trade_in_control_account():
@@ -132,14 +145,18 @@ def delete_trade_in_item_and_account():
     else:
         print(f"{trade_in_control_account} account does not exist.")
 
-    # Delete Trade In item if it exists
+    
+    # Disable Trade In item if it exists and is linked
     if frappe.db.exists('Item', trade_in_item):
         try:
-            frappe.delete_doc('Item', trade_in_item)
-            print(f"{trade_in_item} has been deleted.")
+            item_doc = frappe.get_doc('Item', trade_in_item)
+            item_doc.disabled = 1
+            item_doc.save()
+            print(f"{trade_in_item} has been disabled.")
         except Exception as e:
-            frappe.log_error(message=str(e), title=f"Error deleting {trade_in_item}")
-            print(f"Failed to delete {trade_in_item}: {str(e)}")
+            frappe.log_error(message=str(e), title=f"Error disabling {trade_in_item}")
+            print(f"Failed to disable {trade_in_item}: {str(e)}")
     else:
         print(f"{trade_in_item} does not exist.")
+
 

@@ -2909,10 +2909,18 @@ def validate_trade_in_serial_no_and_batch(doc, method):
 
 
 def validate_trade_in_sales_percentage(doc, method):
+    # Check if "custom_is_trade_in" is checked
+    if not doc.custom_is_trade_in:
+        return  # Skip validation if trade-in is not applicable
+
     # Calculate the total trade-in value from the child table where item_code = "Trade In"
     total_trade_in_value = sum(
         row.custom_total_trade_in_value for row in doc.items if row.item_code == "Trade In"
     )
+
+    # If there are no trade-in items, skip validation
+    if total_trade_in_value == 0:
+        return  # No validation needed
 
     # Calculate the total for items in the child table where item_code != "Trade In" using the "amount" field
     non_trade_in_total = sum(
@@ -2928,14 +2936,37 @@ def validate_trade_in_sales_percentage(doc, method):
     # Validate total trade-in value
     if total_trade_in_value > allowed_trade_in_value:
         # Throw error if child table total exceeds the allowed limit
-        frappe.throw(
-            title="Trade-In Value Validation Error",
-            msg=(
-                f"Total Trade-In Value ({frappe.format_value(total_trade_in_value)}) exceeds the allowed limit. "
-                f"The allowed limit is {trade_in_percentage}% of the total value of non-Trade-In items in the Sales Invoice. "
-                f"Maximum allowed Trade-In Value: {frappe.format_value(allowed_trade_in_value)}."
-            )
-        )
+       frappe.throw(
+    title="Trade-In Value Validation Error",
+    msg=f"""
+        <h4>Trade-In Value Validation Error</h4>
+        <p>The Total Trade-In Value exceeds the allowed limit. Please review the details below:</p>
+        <table style="border-collapse: collapse; width: 100%; text-align: left; border: 1px solid #ddd;">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th style="border: 1px solid #ddd; padding: 8px;">Description</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;">Total Trade-In Value</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">{frappe.format_value(total_trade_in_value)}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;">Allowed Trade-In Percentage</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">{trade_in_percentage}%</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;">Maximum Allowed Trade-In Value</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">{frappe.format_value(allowed_trade_in_value)}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Please adjust the trade-in value or reduce the quantity of trade-in items.</p>
+    """
+)
+
 
 def create_trade_in_stock_entry(doc, method):
     # Initialize an empty list to store items
@@ -2956,12 +2987,6 @@ def create_trade_in_stock_entry(doc, method):
 
     if not trade_in_control_account:
         frappe.throw(f"Trade-In Control Account not configured for {doc.company}. Please set it in the Company settings.")
-
-    # Dynamically set warehouse name using company abbreviation
-    to_warehouse = f"Stores - {company_abbr}"
-
-    if not frappe.db.exists("Warehouse", to_warehouse):
-        frappe.throw(f"Warehouse '{to_warehouse}' does not exist. Please create it first.")
 
     # Iterate through the items in the document
     for item in doc.items:
@@ -2991,6 +3016,7 @@ def create_trade_in_stock_entry(doc, method):
                 "batch_no": custom_batch_no,  # Use the custom batch number here
                 "serial_no": item.get("custom_trade_in_serial_no"),  # Get custom serial number value
                 "expense_account": trade_in_control_account,
+                "t_warehouse": item.get("warehouse"),  # Use the warehouse from the Sales Invoice child table
             })
 
     # Create a single stock entry if there are items to add
@@ -2999,13 +3025,11 @@ def create_trade_in_stock_entry(doc, method):
             stock_entry = frappe.get_doc({
                 "doctype": "Stock Entry",
                 "stock_entry_type": "Material Receipt",
-                "to_warehouse": to_warehouse,  # Use dynamic warehouse name
                 "items": items_list,  # Use the populated list here
                 "custom_sales_invoice": doc.name,  # Link to the parent Sales Invoice
             })
 
             # Insert and submit the Stock Entry
-          
             stock_entry.insert()
             stock_entry.submit()
             frappe.db.commit()
@@ -3016,4 +3040,4 @@ def create_trade_in_stock_entry(doc, method):
             frappe.db.rollback()
             frappe.throw(f"Error during Stock Entry creation: {str(e)}")
     else:
-        frappe.msgprint("No valid items found for stock entry.")            
+        frappe.msgprint("No valid items found for stock entry.")

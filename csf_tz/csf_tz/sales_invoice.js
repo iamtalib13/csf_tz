@@ -166,11 +166,13 @@ frappe.ui.form.on("Sales Invoice", {
             item_code: "Trade In",
             item_name: "Trade In",
             income_account: `Trade In Control - ${abbr}`, // Set income account dynamically
+            warehouse: `Stores - ${abbr}`,
             uom: "Nos", // Set unit of measure
             qty: 1, // Set quantity to 1
             description: "Trade-In", // Set description
           });
           frm.refresh_field("items");
+          // frm.set_value("set_warehouse", `Stores - ${abbr}`);
         }
       });
     } else {

@@ -170,8 +170,6 @@ def set_negative_rates_for_items():
         selling_settings.allow_negative_rates_for_items = 1
         selling_settings.save()
 
-        # Commit changes to the database
-        frappe.db.commit()
         print("Allow Negative Rates for Items set to 1 successfully.")
     
     except Exception as e:

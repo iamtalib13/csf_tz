@@ -2883,6 +2883,10 @@ def get_item_prices_po(item_code, currency, customer=None, company=None):
     return prices_list
 
 def validate_trade_in_serial_no_and_batch(doc, method):
+    # Check if "custom_is_trade_in" is checked
+    if not doc.custom_is_trade_in:
+        return  # Skip validation if trade-in is not applicable
+        
     error_messages = []
     for row in doc.items:
         if row.item_code == "Trade In" and row.custom_trade_in_item:
@@ -2969,6 +2973,10 @@ def validate_trade_in_sales_percentage(doc, method):
 
 
 def create_trade_in_stock_entry(doc, method):
+    # Check if "custom_is_trade_in" is checked
+    if not doc.custom_is_trade_in:
+        return  # Skip validation if trade-in is not applicable
+
     # Initialize an empty list to store items
     items_list = []
 
@@ -3017,6 +3025,7 @@ def create_trade_in_stock_entry(doc, method):
                 "serial_no": item.get("custom_trade_in_serial_no"),  # Get custom serial number value
                 "expense_account": trade_in_control_account,
                 "t_warehouse": item.get("warehouse"),  # Use the warehouse from the Sales Invoice child table
+                "use_serial_batch_fields" : 1
             })
 
     # Create a single stock entry if there are items to add

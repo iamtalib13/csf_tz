@@ -3000,8 +3000,9 @@ def create_trade_in_stock_entry(doc, method):
     company_abbr = company_details.get('abbr')
 
     if not trade_in_control_account:
-           frappe.throw(f"Trade-In Control Account not configured for {doc.company}. Please set it in the <a href='/app/company/{doc.company}'>Company settings</a>.")
-           return
+        frappe.throw(f"Trade-In Control Account not configured for {doc.company}. Please set it in the <a href='/app/company/{doc.company}'>Company settings</a>.")
+        return
+
     # Iterate through the items in the document
     for item in doc.items:
         if item.get("custom_trade_in_item") and item.get("custom_trade_in_qty"):

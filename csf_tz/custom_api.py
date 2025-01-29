@@ -2997,7 +2997,6 @@ def create_trade_in_stock_entry(doc, method):
         return
 
     trade_in_control_account = company_details.get("custom_trade_in_control_account")
-    company_abbr = company_details.get("abbr")
 
     if not trade_in_control_account:
         frappe.throw(
